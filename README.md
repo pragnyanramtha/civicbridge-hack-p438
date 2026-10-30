@@ -27,7 +27,7 @@ For a new deployment, create a Vercel project, connect this repository, and set 
 | `STAFF_PASSWORD` | Demo staff sign-in |
 | `AI_GATEWAY_MODEL` | An exact model ID from the Vercel AI Gateway catalog |
 
-For deployed AI calls, Vercel injects `VERCEL_OIDC_TOKEN`; no provider key is needed in browser code. To enable AI locally, optionally set `AI_GATEWAY_API_KEY`. If inference is unavailable, the assistant returns a **labelled source-lookup fallback**. An unsupported question returns no citations and no fabricated answer.
+For deployed AI calls, `@vercel/oidc` reads the current request's Vercel OIDC token; no provider key is needed in browser code. It also supports a local `VERCEL_OIDC_TOKEN`. To enable AI locally, optionally set `AI_GATEWAY_API_KEY`. If inference is unavailable, the assistant returns a **labelled source-lookup fallback**. An unsupported question returns no citations and no fabricated answer.
 
 ## Use the demo
 

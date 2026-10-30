@@ -24,6 +24,9 @@ test("unsupported questions do not get a fabricated source",()=>{
 test("a follow-up uses the preceding source without matching a generic documents keyword",()=>{
   assert.equal(retrieve("What documents do I need?","water-leak")[0]?.id,"water-leak");
 });
+test("English keywords do not match inside unrelated words",()=>{
+  assert.deepEqual(retrieve("How do I report a streetlight that is not working?").map(s=>s.id),["streetlight"]);
+});
 test("case transitions require acknowledgement and work before resolution",()=>{
   assert.equal(canTransition("Submitted","Resolved"),false);
   assert.equal(canTransition("Submitted","Acknowledged"),true);

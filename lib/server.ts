@@ -1,5 +1,6 @@
 import { createHash, createHmac, randomBytes, randomInt, randomUUID, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
+import { getVercelOidcToken } from "@vercel/oidc";
 import { db } from "./db";
 import { categories, retrieve, serviceSummary, serviceTitle, services, type Language } from "./catalog";
 import { canTransition, validText } from "./workflow";
@@ -183,7 +184,8 @@ export async function chat(req:Request){
   let answer=language==="en"?`${s.summary}\n\n${s.steps.map((x,i)=>`${i+1}. ${x}`).join("\n")}\n\nWhat to include: ${s.documents.join("; ")}.\n\nThis is sample guidance. CivicBridge records a demo request only; it does not submit it to a government department.`:language==="te"?`${s.summaryTe}\n\nనమూనా ఫిర్యాదులో సమస్య వివరాలు, ప్రాంతం మరియు సమీప గుర్తింపు స్థలాన్ని చేర్చండి. ఫోటో జోడించడం ఐచ్ఛికం. వ్యక్తిగత గుర్తింపు పత్రాలను అప్‌లోడ్ చేయవద్దు.\n\nసమర్పించిన తర్వాత రిఫరెన్స్ నంబర్ మరియు ట్రాకింగ్ కోడ్‌ను భద్రపరచండి. ఇది డెమో మాత్రమే; ప్రభుత్వ శాఖకు ఫిర్యాదు పంపబడదు. పూర్తి ఆంగ్ల మార్గదర్శకం క్రింది మూలంలో ఉంది.`:`${s.summaryHi}\n\nनमूना शिकायत में समस्या का विवरण, क्षेत्र और पास का पहचान स्थल दें. फोटो जोड़ना वैकल्पिक है. पहचान दस्तावेज़ अपलोड न करें.\n\nजमा करने के बाद संदर्भ संख्या और ट्रैकिंग कोड सुरक्षित रखें. यह केवल डेमो है; शिकायत किसी सरकारी विभाग को नहीं भेजी जाती. पूरी अंग्रेज़ी गाइड नीचे दिए स्रोत में है.`;
   let mode="source-lookup";
   let fallbackReason="No AI credentials are configured for this runtime.";
-  const token=process.env.AI_GATEWAY_API_KEY||process.env.VERCEL_OIDC_TOKEN;
+  let token=process.env.AI_GATEWAY_API_KEY;
+  if(!token){try{token=await getVercelOidcToken();}catch{ /* Local demo can use source lookup without a model credential. */ }}
   if(token&&process.env.AI_GATEWAY_MODEL){
     fallbackReason="Inference did not return a generated answer.";
     try{

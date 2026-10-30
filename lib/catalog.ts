@@ -35,7 +35,11 @@ export function retrieve(question: string, contextId?: string): Service[] {
   const ranked = services.map(s => {
     const corpus = `${s.title} ${s.keywords.join(" ")}`.toLowerCase();
     let score = words.reduce((n,w) => n + (corpus.split(/[^\p{L}\p{N}]+/u).includes(w) ? 2 : 0),0);
-    for(const keyword of s.keywords) if(text.includes(keyword.toLowerCase())) score += keyword.includes(" ") ? 7 : 3;
+    for(const keyword of s.keywords) {
+      const k=keyword.toLowerCase();
+      const matches=/^[a-z0-9 ]+$/.test(k)?new RegExp(`\\b${k.replaceAll(" ","\\s+")}\\b`).test(text):text.includes(k);
+      if(matches)score += keyword.includes(" ") ? 7 : 3;
+    }
     return {s,score};
   }).filter(x=>x.score>=3).sort((a,b)=>b.score-a.score);
   if(ranked.length) return ranked.slice(0,2).map(x=>x.s);
