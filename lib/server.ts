@@ -182,8 +182,10 @@ export async function chat(req:Request){
   const s=found[0];
   let answer=language==="en"?`${s.summary}\n\n${s.steps.map((x,i)=>`${i+1}. ${x}`).join("\n")}\n\nWhat to include: ${s.documents.join("; ")}.\n\nThis is sample guidance. CivicBridge records a demo request only; it does not submit it to a government department.`:language==="te"?`${s.summaryTe}\n\nనమూనా ఫిర్యాదులో సమస్య వివరాలు, ప్రాంతం మరియు సమీప గుర్తింపు స్థలాన్ని చేర్చండి. ఫోటో జోడించడం ఐచ్ఛికం. వ్యక్తిగత గుర్తింపు పత్రాలను అప్‌లోడ్ చేయవద్దు.\n\nసమర్పించిన తర్వాత రిఫరెన్స్ నంబర్ మరియు ట్రాకింగ్ కోడ్‌ను భద్రపరచండి. ఇది డెమో మాత్రమే; ప్రభుత్వ శాఖకు ఫిర్యాదు పంపబడదు. పూర్తి ఆంగ్ల మార్గదర్శకం క్రింది మూలంలో ఉంది.`:`${s.summaryHi}\n\nनमूना शिकायत में समस्या का विवरण, क्षेत्र और पास का पहचान स्थल दें. फोटो जोड़ना वैकल्पिक है. पहचान दस्तावेज़ अपलोड न करें.\n\nजमा करने के बाद संदर्भ संख्या और ट्रैकिंग कोड सुरक्षित रखें. यह केवल डेमो है; शिकायत किसी सरकारी विभाग को नहीं भेजी जाती. पूरी अंग्रेज़ी गाइड नीचे दिए स्रोत में है.`;
   let mode="source-lookup";
+  let fallbackReason="No AI credentials are configured for this runtime.";
   const token=process.env.AI_GATEWAY_API_KEY||process.env.VERCEL_OIDC_TOKEN;
   if(token&&process.env.AI_GATEWAY_MODEL){
+    fallbackReason="Inference did not return a generated answer.";
     try{
       await rateLimit(req,"ai-daily",100,86400,new Date().toISOString().slice(0,10));
       const response=await fetch("https://ai-gateway.vercel.sh/v1/chat/completions",{
@@ -193,10 +195,11 @@ export async function chat(req:Request){
           {role:"user",content:input.question}
         ]})
       });
+      if(!response.ok) fallbackReason=`AI Gateway returned HTTP ${response.status}.`;
       if(response.ok){const result=await response.json();const generated=result.choices?.[0]?.message?.content;if(typeof generated==="string"&&generated.trim()){answer=generated.trim().slice(0,7000);mode="ai-grounded";}}
-    }catch{ /* The labelled extractive fallback keeps the demo working without paid inference. */ }
+    }catch(error){ fallbackReason=error instanceof HttpError?"The prototype daily AI budget has been reached.":"Inference timed out or was unavailable."; }
   }
-  return {answer,sources,supported:true,mode,category:s.category};
+  return {answer,sources,supported:true,mode,category:s.category,...(mode==="source-lookup"?{fallbackReason}:{})};
 }
 export async function feedback(req:Request){
   const id=await owner();await rateLimit(req,"feedback",20,600);const input=await readJson(req);
