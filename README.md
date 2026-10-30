@@ -4,6 +4,8 @@
 
 A citizen-facing public-service assistant with a searchable directory, visible sources, guided grievances, private request history, tracking codes, attachments, and a protected staff queue.
 
+**Current live status:** the directory, request submission, tracking, attachments, and staff workflow are verified. Vercel AI Gateway reports HTTP 403 because this account needs a valid card on file to unlock its free AI credits. Until that setup is complete, the assistant uses its clearly labelled source-lookup fallback. Request-scoped OIDC authentication is already integrated. No broad system-environment exposure is required.
+
 ## Run locally
 
 Requires Node.js 22+ and a PostgreSQL database. The deployment uses Node.js 24, Next.js 16, React 19, and Neon PostgreSQL.

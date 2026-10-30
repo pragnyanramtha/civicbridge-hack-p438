@@ -20,3 +20,7 @@ Date: 30 October 2026. Target: `https://civicbridge-hack-p438.vercel.app`.
 The first integration run used the labelled extractive/source-lookup path. AI runtime authentication is checked separately after the request-scoped OIDC integration. Do not interpret the first run as proof of model inference.
 
 The local preview environment could render the interface but could not complete database connections; persistence checks above ran against the Vercel deployment and Neon instead. Test cases contain synthetic data and remain labelled in the demo workspace.
+
+## AI provider check
+
+The deployed request-scoped OIDC path reached AI Gateway. The provider returned HTTP 403 and stated that a valid credit card must be added to the Vercel account to unlock free AI credits. No card or plan change was made. The live app therefore continues to use the labelled, cited source-lookup fallback. Model-generated responses remain unverified until that account prerequisite is completed.
