@@ -1,0 +1,1 @@
+export default function NotFound(){return <main style={{maxWidth:600,margin:"120px auto",padding:24,fontFamily:"system-ui"}}><h1>That page isn’t here.</h1><p>Return to CivicBridge to find a service or track your request.</p><a href="/">Back to CivicBridge →</a></main>;}
